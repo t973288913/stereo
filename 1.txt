@@ -1,0 +1,27 @@
+CUDA_VISIBLE_DEVICES=0,1 python openstereo/main.py --config ./configs/psmnet/PSMNet_kitti.yaml --scope val --restore_hint ./output/KITTI2015/PSMNet/PSMNet_SceneFlow/checkpoints/PSMNet_SceneFlow_epoch_014.pt
+
+CUDA_VISIBLE_DEVICES=0,1 python openstereo/main.py --config ./configs/psmnet/PSMNet_kitti.yaml --scope val --restore_hint ./output/PSMNet_KITTI15_epoch_1000.pt
+
+
+CUDA_VISIBLE_DEVICES=0,1 python openstereo/main.py --config ./configs/psmnet/PSMNet_sceneflow.yaml --scope val --restore_hint ./output/PSMNet_SceneFlow.pt
+
+CUDA_VISIBLE_DEVICES=0,1 python openstereo/main.py --config ./configs/igev/igev_kitti.yaml --scope val --restore_hint ./output/igev_kitti_s_epoch_350.pt
+
+
+CUDA_VISIBLE_DEVICES=0 python openstereo/main.py --config ./configs/msnet/MSNet2D_kitti_mul.yaml --scope train --restore_hint ./output/mul/MSNet_mul/MSNet2D_oldbone/checkpoints/MSNet2D_oldbone_epoch_3080.pt
+CUDA_VISIBLE_DEVICES=0,1 python openstereo/main.py --config ./configs/psmnet/PSMNet_kitti.yaml --scope train
+
+cd output/KITTI2015/PSMNet/PSMNet_SceneFlow/summary
+
+tensorboard --logdir=./
+
+CUDA_VISIBLE_DEVICES=0 python openstereo/main.py --config ./configs/msnet/MSNet2D_kitti.yaml --scope train
+
+--restore_hint ./output/mul/MSNet_mul/MSNet2D_freeze_seg_loss/checkpoints/MSNet2D_freeze_seg_loss_epoch_200.pt
+--restore_hint ./output/mul/MSNet_mul/MSNet2D_seg_loss/checkpoints/MSNet2D_freeze_seg_loss_epoch_2000.pt
+
+CUDA_VISIBLE_DEVICES=0 python openstereo/main.py --config ./configs/igev/igev_kitti.yaml --scope train
+
+
+--restore_hint ../output/mul/MSNet_mul/MSNet2D_newbone_room/checkpoints/MSNet2D_newbone_room_latest.pt
+

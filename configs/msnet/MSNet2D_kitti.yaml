@@ -1,0 +1,114 @@
+data_cfg:
+  root: ../stereo/datasets/KITTI15
+  train_list: ../stereo/datasets/KITTI15/ylab-test.txt
+  val_list: ../stereo/datasets/KITTI15/kitti15_train1_mul.txt
+  val_disp_list: ../stereo/datasets/KITTI15/ylab-test.txt
+  train_batch_size: 6
+  val_batch_size: 6
+  name: mul_only_disp
+  disp_reader : PIL
+  batch_uniform: false
+  transform:
+    train:
+      - type: RandomCrop
+        size: [ 256, 512 ]
+      - type: GetValidDisp
+        max_disp: 192
+      - type: TransposeImage
+      - type: ToTensor
+
+    val:
+      - type: CropOrPad
+        # size: [ 480, 640 ]
+        # size: [ 480, 640 ]
+        size: [ 384, 1248 ]
+      - type: GetValidDisp
+        max_disp: 192
+      - type: TransposeImage
+      - type: ToTensor
+
+ 
+  transform_disp:
+    train_disp:
+      - type: RandomCrop
+        size: [ 256, 512 ]
+      - type: GetValidDisp
+        max_disp: 192
+      - type: TransposeImage
+      - type: ToTensor
+
+    val_disp:
+      - type: CropOrPad
+        # size: [ 480, 640 ]
+        size: [ 480, 640 ]
+        # size: [ 384, 1248 ]
+      - type: GetValidDisp
+        max_disp: 192
+      - type: TransposeImage
+      - type: ToTensor
+
+
+
+model_cfg:
+  model: MSNet_mul
+  model_type: mul_only_disp
+
+  base_config:
+    max_disp: 192
+    num_classes: 19
+
+loss_cfg:
+  - log_prefix: disp
+    loss_term_weight: 1
+    type: Weighted_Smooth_l1_Loss
+    weights: [ 0.5, 0.5, 0.7, 1.0 ]
+
+
+trainer_cfg:
+  save_name: MSNet2D_test
+  fix_bn: True
+  total_epoch: 6000
+
+  num_classes: 19
+
+
+  restore_hint: 0
+  optimizer_reset: True
+  scheduler_reset: True
+  warmup_reset: True
+  log_iter: 2 # iter
+  save_every: 100 # epoch
+  val_every: 1 # epoch
+  amp: false
+  sync_bn: false
+
+  init_parameters: false
+
+  optimizer_cfg:
+    solver: Adam
+    lr: 0.001
+    betas: [ 0.9, 0.999 ]
+
+  scheduler_cfg:
+    scheduler: MultiStepLR
+    gamma: 0.5
+    milestones: [ 10, 12, 14, 16 ]
+    warmup:
+      warmup_steps: 100
+
+  evaluator_cfg:
+    metric:
+      - d1_all
+      - epe
+      - bad_1
+      - bad_2
+      - bad_3
+      - miou
+      - f1
+
+#  clip_grad_cfg:
+#    #    type: norm
+#    #    max_norm: 35
+#    #    norm_type: 2
+#    type: value
+#    clip_value: 0.1
